@@ -1,0 +1,30 @@
+# Maven build output
+target/
+
+# TestNG outputs
+test-output/
+
+# Local reports & run artifacts
+reports/*.html
+screenshots/*.png
+
+# Keep directory structure
+!reports/.gitkeep
+!screenshots/.gitkeep
+
+# IDE specific files
+.classpath
+.project
+.settings/
+.apt_generated/
+.apt_generated_tests/
+.vscode/
+
+# OS specific files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary & Log files
+*.log
+scratch/

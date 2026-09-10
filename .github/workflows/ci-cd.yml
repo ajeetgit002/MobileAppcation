@@ -1,0 +1,109 @@
+name: Mobile Automation CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - staging
+          - prod
+
+jobs:
+  # ====================================================
+  # 1. BUILD & DEPENDENCIES
+  # ====================================================
+  build:
+    name: Checkout & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+        continue-on-error: true
+
+      - name: Install Node Dependencies
+        run: npm ci || echo "No package-lock.json, continuing..."
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile Automation Framework
+        run: mvn test-compile
+
+  # ====================================================
+  # 2. SMOKE TESTS GATE (STOP IF FAIL ❌)
+  # ====================================================
+  smoke_gate:
+    name: Smoke Tests Gate
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Smoke Test Gate
+        run: mvn test -DsuiteXmlFile=src/test/resources/testng-smoke.xml
+
+      - name: Upload Smoke Test Reports & Screenshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-failures
+          path: |
+            reports/
+            screenshots/
+
+  # ====================================================
+  # 3. FULL REGRESSION (RUNS ONLY IF SMOKE PASSES ✅)
+  # ====================================================
+  regression:
+    name: Full Regression Tests
+    needs: smoke_gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Full Regression Suite
+        run: mvn test -DsuiteXmlFile=src/test/resources/testng-regression.xml
+
+      - name: Upload Regression ExtentReports & Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extent-reports
+          path: |
+            reports/
+            screenshots/

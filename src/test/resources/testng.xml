@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-current.dtd">
+
+<suite name="Appium Automation Suite" verbose="2" parallel="false">
+    
+    <listeners>
+        <listener class-name="com.itsm.app.listeners.TestListener" />
+    </listeners>
+
+    <test name="Android Mobile Automation Tests">
+        <classes>
+            <class name="com.itsm.app.tests.LoginTest" />
+            <class name="com.itsm.app.tests.DashboardTestScript" />
+        </classes>
+    </test>
+
+</suite>
