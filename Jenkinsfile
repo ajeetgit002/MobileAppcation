@@ -10,7 +10,7 @@ pipeline {
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['qa', 'staging', 'prod'], description: 'Target Environment')
         choice(name: 'PLATFORM', choices: ['Android', 'iOS'], description: 'Target Mobile Platform')
-        string(name: 'RECIPIENT_EMAIL', defaultValue: 'qa-automation-team@company.com', description: 'Notification Email Recipient')
+        string(name: 'RECIPIENT_EMAIL', defaultValue: 'ajeet2581997@gmail.com', description: 'Notification Email Recipient')
     }
 
     environment {
