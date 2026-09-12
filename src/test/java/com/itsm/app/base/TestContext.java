@@ -1,5 +1,6 @@
 package com.itsm.app.base;
 
+import com.itsm.app.pages.CatalogPage;
 import com.itsm.app.pages.CreateTicketPage;
 import com.itsm.app.pages.DashboardPage;
 import com.itsm.app.pages.LoginPage;
@@ -49,6 +50,7 @@ public final class TestContext {
 	private CreateTicketPage createTicketPage;
 	private TicketsPage ticketsPage;
 	private TicketDetailsPage ticketDetailsPage;
+	private CatalogPage catalogPage;
 
 	// =========================================
 	// CONSTRUCTOR
@@ -225,6 +227,13 @@ public final class TestContext {
 		return ticketDetailsPage;
 	}
 
+	public CatalogPage getCatalogPage() {
+		if (catalogPage == null) {
+			catalogPage = new CatalogPage();
+		}
+		return catalogPage;
+	}
+
 	// =========================================
 	// CLEAR DRIVER DEPENDENT OBJECTS
 	// =========================================
@@ -243,6 +252,7 @@ public final class TestContext {
 		createTicketPage = null;
 		ticketsPage = null;
 		ticketDetailsPage = null;
+		catalogPage = null;
 	}
 
 	// =========================================
