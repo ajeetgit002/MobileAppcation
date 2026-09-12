@@ -4,7 +4,6 @@ pipeline {
     options {
         timeout(time: 2, unit: 'HOURS')
         buildDiscarder(logRotator(numToKeepStr: '30'))
-        ansiColor('xterm')
     }
 
     parameters {
@@ -234,30 +233,38 @@ pipeline {
                 </html>
                 """
 
-                // Sends via Jenkins Email Extension or standard mail
-                emailext (
-                    subject: "[CI/CD FAILED] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} at ${FAILED_STAGE}",
-                    body: emailBody,
-                    mimeType: 'text/html',
-                    to: "${params.RECIPIENT_EMAIL}",
-                    attachmentsPattern: 'reports/**/*.html'
-                )
+                // Sends via Jenkins Email Extension if plugin is installed
+                try {
+                    emailext (
+                        subject: "[CI/CD FAILED] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} at ${FAILED_STAGE}",
+                        body: emailBody,
+                        mimeType: 'text/html',
+                        to: "${params.RECIPIENT_EMAIL}",
+                        attachmentsPattern: 'reports/**/*.html'
+                    )
+                } catch (Exception e) {
+                    echo "Email notification skipped (Email Extension plugin not installed or SMTP not configured): ${e.message}"
+                }
             }
         }
 
         success {
             script {
                 echo "Pipeline completed successfully! All gates passed."
-                emailext (
-                    subject: "[CI/CD SUCCESS] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} Deployed to Production ✅",
-                    body: """
-                    <h2>${PROJECT_NAME} - Build #${env.BUILD_NUMBER} SUCCESSFUL ✅</h2>
-                    <p>All Smoke and Regression suites passed. Application has been deployed to Production.</p>
-                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
-                    """,
-                    mimeType: 'text/html',
-                    to: "${params.RECIPIENT_EMAIL}"
-                )
+                try {
+                    emailext (
+                        subject: "[CI/CD SUCCESS] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} Deployed to Production ✅",
+                        body: """
+                        <h2>${PROJECT_NAME} - Build #${env.BUILD_NUMBER} SUCCESSFUL ✅</h2>
+                        <p>All Smoke and Regression suites passed. Application has been deployed to Production.</p>
+                        <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                        """,
+                        mimeType: 'text/html',
+                        to: "${params.RECIPIENT_EMAIL}"
+                    )
+                } catch (Exception e) {
+                    echo "Success notification email skipped: ${e.message}"
+                }
             }
         }
     }
