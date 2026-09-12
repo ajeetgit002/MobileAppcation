@@ -71,6 +71,7 @@ public class DriverFactory {
 			options.setNoReset(configReader.isNoReset());
 			options.setFullReset(configReader.isFullReset());
 			options.setAutoGrantPermissions(true);
+			options.setSkipDeviceInitialization(true);
 			options.setUiautomator2ServerLaunchTimeout(Duration.ofSeconds(60));
 			options.setUiautomator2ServerInstallTimeout(Duration.ofSeconds(60));
 			options.setAdbExecTimeout(Duration.ofSeconds(60));

@@ -216,6 +216,24 @@ public abstract class BasePage {
 	}
 
 	/**
+	 * Perform a single tap at exact screen coordinates using W3C pointer actions.
+	 */
+	public void tapAt(int x, int y) {
+		try {
+			PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+			Sequence tap = new Sequence(finger, 1);
+			tap.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, y));
+			tap.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+			tap.addAction(new Pause(finger, Duration.ofMillis(100)));
+			tap.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+			getDriver().perform(Collections.singletonList(tap));
+			Thread.sleep(200);
+		} catch (Exception e) {
+			ReportManager.warning("tapAt failed at (" + x + "," + y + "): " + e.getMessage());
+		}
+	}
+
+	/**
 	 * Reset view to the top by scrolling up.
 	 */
 	public void scrollToTop() {

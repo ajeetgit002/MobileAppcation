@@ -26,7 +26,7 @@ public class TicketsPage extends BasePage {
 	// =========================================
 
 	private static final By TICKETS_BOTTOM_TAB = AppiumBy
-			.xpath("(//*[contains(@content-desc,'Ticket') or contains(@text,'Ticket')])[last()]");
+			.xpath("//android.widget.ImageView[@content-desc='Tickets']");
 	private static final By ONGOING_TAB = AppiumBy.xpath("//*[starts-with(@content-desc,'Ongoing')]");
 	private static final By RESOLVED_TAB = AppiumBy.xpath("//*[starts-with(@content-desc,'Resolved')]");
 	private static final By TICKETS_HEADER = AppiumBy.xpath("//*[contains(@content-desc,'Tickets')]");
@@ -53,8 +53,27 @@ public class TicketsPage extends BasePage {
 	 */
 	public void openTicketsTab() {
 		ReportManager.info("Opening Tickets tab from bottom navigation...");
-		if (!isDisplayedNow(ONGOING_TAB)) {
-			click(TICKETS_BOTTOM_TAB);
+		if (isDisplayedNow(ONGOING_TAB)) {
+			ReportManager.pass("Already on Tickets screen");
+			return;
+		}
+		try {
+			if (isDisplayedNow(AppiumBy.xpath("//*[contains(@content-desc,'Ticket Details')]"))) {
+				tapAt(60, 220);
+				Thread.sleep(1000);
+				if (isDisplayedNow(ONGOING_TAB)) {
+					ReportManager.pass("Returned to Tickets screen");
+					return;
+				}
+			}
+			if (isDisplayedNow(TICKETS_BOTTOM_TAB)) {
+				click(TICKETS_BOTTOM_TAB);
+			} else {
+				// Tap bottom nav tab 2 (Tickets is the 2nd tab from left around x=330, y=2272)
+				tapAt(330, 2272);
+			}
+		} catch (Exception e) {
+			tapAt(330, 2272);
 		}
 		waitForVisible(ONGOING_TAB, Duration.ofSeconds(10));
 		ReportManager.pass("Tickets screen is displayed");
@@ -238,19 +257,27 @@ public class TicketsPage extends BasePage {
 	 */
 	public boolean openFirstTicket() {
 		ReportManager.info("Opening the first visible ticket...");
-		try {
-			WebElement firstTicket = waitForVisible(TICKET_CARDS, Duration.ofSeconds(10));
-			firstTicket.click();
-			ReportManager.pass("Clicked first ticket card");
+		for (int attempt = 1; attempt <= 3; attempt++) {
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException ignored) {
+				WebElement firstTicket = waitForVisible(TICKET_CARDS, Duration.ofSeconds(10));
+				firstTicket.click();
+				ReportManager.pass("Clicked first ticket card (attempt " + attempt + ")");
+				Thread.sleep(1500);
+				if (isDisplayedNow(AppiumBy.xpath("//*[contains(@content-desc,'Ticket Details')]"))) {
+					return true;
+				}
+				// Retry with coordinate tap if standard element click was intercepted
+				org.openqa.selenium.Rectangle rect = firstTicket.getRect();
+				tapAt(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+				Thread.sleep(1500);
+				if (isDisplayedNow(AppiumBy.xpath("//*[contains(@content-desc,'Ticket Details')]"))) {
+					return true;
+				}
+			} catch (Exception e) {
+				ReportManager.warning("Attempt " + attempt + " to open first ticket failed: " + e.getMessage());
 			}
-			return true;
-		} catch (Exception e) {
-			ReportManager.warning("Failed to click first ticket: " + e.getMessage());
-			return false;
 		}
+		return isDisplayedNow(AppiumBy.xpath("//*[contains(@content-desc,'Ticket Details')]"));
 	}
 
 	/**

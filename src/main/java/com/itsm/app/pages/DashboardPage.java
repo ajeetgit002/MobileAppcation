@@ -107,10 +107,11 @@ public class DashboardPage extends BasePage {
 	// =========================================
 
 	public void dismissOverlaysIfPresent() {
-		clickIfDisplayed(AppiumBy.accessibilityId("Later"));
-		clickIfDisplayed(AppiumBy.xpath("//*[@content-desc='Later' or @text='Later']"));
-		clickIfDisplayed(By.id("com.android.permissioncontroller:id/permission_allow_button"));
-		clickIfDisplayed(AppiumBy.xpath("//*[@text='Allow' or @content-desc='Allow']"));
+		java.time.Duration quickWait = java.time.Duration.ofMillis(300);
+		clickIfDisplayed(AppiumBy.accessibilityId("Later"), quickWait);
+		clickIfDisplayed(AppiumBy.xpath("//*[@content-desc='Later' or @text='Later']"), quickWait);
+		clickIfDisplayed(By.id("com.android.permissioncontroller:id/permission_allow_button"), quickWait);
+		clickIfDisplayed(AppiumBy.xpath("//*[@text='Allow' or @content-desc='Allow']"), quickWait);
 	}
 
 	// =========================================

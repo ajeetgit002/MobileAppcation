@@ -61,9 +61,21 @@ public class TicketDetailsPage extends BasePage {
 	private static final By PUBLIC_LOGS_INDICATOR = AppiumBy
 			.xpath("//*[contains(@content-desc,'Public Logs')]");
 
-	// CIs Tab
+	// CIs Tab & Add CI Modal
 	private static final By CIS_INDICATOR = AppiumBy
 			.xpath("//*[contains(@content-desc,'CIs')]");
+	private static final By ADD_CI_BUTTON = AppiumBy
+			.xpath("//android.widget.Button[@content-desc='Add CI']");
+	private static final By SELECT_CIS_HEADER = AppiumBy
+			.xpath("//*[contains(@content-desc,'Select CIs')]");
+	private static final By SEARCH_CI_INPUT = AppiumBy
+			.xpath("//android.widget.EditText");
+	private static final By CI_CHECKBOXES = AppiumBy
+			.xpath("//android.widget.CheckBox");
+	private static final By CANCEL_CI_BUTTON = AppiumBy
+			.xpath("//android.widget.Button[@content-desc='Cancel']");
+	private static final By SELECT_CI_BUTTON = AppiumBy
+			.xpath("//android.widget.Button[@content-desc='Select']");
 
 	// Documents Tab
 	private static final By DOCUMENTS_INDICATOR = AppiumBy
@@ -268,8 +280,186 @@ public class TicketDetailsPage extends BasePage {
 	public boolean verifyCIsTab() {
 		ReportManager.info("Verifying CIs tab content...");
 		boolean tabOk = isDisplayed(CIS_INDICATOR, Duration.ofSeconds(5));
-		ReportManager.info("CIs tab displayed: " + tabOk);
+		boolean addCiOk = isDisplayed(ADD_CI_BUTTON, Duration.ofSeconds(5));
+		ReportManager.info("CIs tab displayed: " + tabOk + ", Add CI button displayed: " + addCiOk);
 		return tabOk;
+	}
+
+	/**
+	 * Check if 'Add CI' button is displayed on the CIs tab.
+	 */
+	public boolean isAddCIButtonDisplayed() {
+		return isDisplayed(ADD_CI_BUTTON, Duration.ofSeconds(5));
+	}
+
+	/**
+	 * Click the 'Add CI' button to open the Select CIs modal.
+	 */
+	public void clickAddCI() {
+		ReportManager.info("Clicking 'Add CI' button...");
+		click(ADD_CI_BUTTON);
+		waitForVisible(SELECT_CIS_HEADER, Duration.ofSeconds(8));
+		ReportManager.pass("Clicked 'Add CI' button, Select CIs modal is displayed");
+	}
+
+	/**
+	 * Check if 'Select CIs' modal is displayed.
+	 */
+	public boolean isSelectCIsModalDisplayed() {
+		return isDisplayed(SELECT_CIS_HEADER, Duration.ofSeconds(5));
+	}
+
+	/**
+	 * Verify all elements on the 'Select CIs' modal:
+	 * - Header ("Select CIs")
+	 * - Search CI field
+	 * - Available CI items
+	 * - Cancel button
+	 * - Select button
+	 */
+	public boolean verifySelectCIsModalElements() {
+		ReportManager.info("Verifying all elements on 'Select CIs' modal...");
+		boolean headerOk = isDisplayed(SELECT_CIS_HEADER, Duration.ofSeconds(5));
+		boolean searchOk = isDisplayed(SEARCH_CI_INPUT, Duration.ofSeconds(5));
+		boolean itemsOk = isDisplayed(CI_CHECKBOXES, Duration.ofSeconds(5));
+		boolean cancelOk = isDisplayed(CANCEL_CI_BUTTON, Duration.ofSeconds(5));
+		boolean selectOk = isDisplayed(SELECT_CI_BUTTON, Duration.ofSeconds(5));
+
+		ReportManager.info("Select CIs modal elements: header=" + headerOk + ", search=" + searchOk + ", items=" + itemsOk + ", cancelBtn=" + cancelOk + ", selectBtn=" + selectOk);
+		return headerOk && searchOk && itemsOk && cancelOk && selectOk;
+	}
+
+	/**
+	 * Click 'Cancel' on the Select CIs modal to return to the CIs tab.
+	 */
+	public void clickCancelCIModal() {
+		ReportManager.info("Clicking Cancel on Select CIs modal...");
+		click(CANCEL_CI_BUTTON);
+		waitForVisible(ADD_CI_BUTTON, Duration.ofSeconds(5));
+		ReportManager.pass("Cancelled Select CIs modal and returned to CIs tab");
+	}
+
+	/**
+	 * Click 'Select' on the Select CIs modal to add selected CIs.
+	 */
+	public void clickSelectCIModal() {
+		ReportManager.info("Clicking Select on Select CIs modal...");
+		click(SELECT_CI_BUTTON);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException ignored) {
+		}
+	}
+
+	/**
+	 * Get the current header text of Select CIs modal (e.g. "Select CIs (0)").
+	 */
+	public String getSelectCIsHeaderTitle() {
+		try {
+			WebElement header = waitForVisible(SELECT_CIS_HEADER, Duration.ofSeconds(5));
+			return header.getAttribute("content-desc");
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	/**
+	 * Search CIs using the search input.
+	 */
+	public void searchCI(String query) {
+		ReportManager.info("Searching CI with query: " + query);
+		try {
+			WebElement input = waitForVisible(SEARCH_CI_INPUT, Duration.ofSeconds(5));
+			input.click();
+			input.clear();
+			input.sendKeys(query);
+			Thread.sleep(800);
+		} catch (Exception e) {
+			ReportManager.warning("Search CI failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Clear the CI search input using DEL keyevents to ensure Flutter triggers onChange.
+	 */
+	public void clearSearchCI() {
+		ReportManager.info("Clearing CI search input...");
+		try {
+			WebElement input = waitForVisible(SEARCH_CI_INPUT, Duration.ofSeconds(5));
+			input.click();
+			if (getDriver() instanceof AndroidDriver) {
+				AndroidDriver androidDriver = (AndroidDriver) getDriver();
+				androidDriver.pressKey(new KeyEvent(AndroidKey.MOVE_END));
+				for (int i = 0; i < 20; i++) {
+					androidDriver.pressKey(new KeyEvent(AndroidKey.DEL));
+				}
+			} else {
+				input.clear();
+			}
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			ReportManager.warning("Clear CI search failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Get count of currently displayed CI checkboxes.
+	 */
+	public int getAvailableCIsCount() {
+		try {
+			return getDriver().findElements(CI_CHECKBOXES).size();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Toggle CI checkbox at the specified index by tapping the checkbox square.
+	 */
+	public void toggleCICheckbox(int index) {
+		ReportManager.info("Toggling CI checkbox at index: " + index);
+		try {
+			java.util.List<WebElement> boxes = getDriver().findElements(CI_CHECKBOXES);
+			if (index < boxes.size()) {
+				WebElement box = boxes.get(index);
+				org.openqa.selenium.Rectangle rect = box.getRect();
+				int tapX = rect.getX() + 45;
+				int tapY = rect.getY() + 45;
+				tapAt(tapX, tapY);
+				Thread.sleep(800);
+			}
+		} catch (Exception e) {
+			ReportManager.warning("Toggle CI checkbox failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Check if the CI at the specified index is checked.
+	 */
+	public boolean isCIChecked(int index) {
+		try {
+			java.util.List<WebElement> boxes = getDriver().findElements(CI_CHECKBOXES);
+			if (index < boxes.size()) {
+				String checked = boxes.get(index).getAttribute("checked");
+				return "true".equalsIgnoreCase(checked);
+			}
+		} catch (Exception ignored) {
+		}
+		return false;
+	}
+
+	/**
+	 * Check if the 'Select' button is enabled.
+	 */
+	public boolean isSelectButtonEnabled() {
+		try {
+			WebElement btn = waitForVisible(SELECT_CI_BUTTON, Duration.ofSeconds(3));
+			String enabled = btn.getAttribute("enabled");
+			String clickable = btn.getAttribute("clickable");
+			return "true".equalsIgnoreCase(enabled) || "true".equalsIgnoreCase(clickable);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	/**

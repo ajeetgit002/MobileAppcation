@@ -137,13 +137,72 @@ public class TicketFiltersAndDetailsTest extends BaseTest {
 				"Public Logs tab content should be displayed");
 		ReportManager.pass("Tab 3: Public Logs verified successfully");
 
-		// 6. Verify Tab 4: CIs
+		// 6. Verify Tab 4: CIs & Add CI Functionality
 		ReportManager.info("Verifying Tab 4: CIs");
 		boolean cisSelected = ticketDetailsPage.selectTab("CIs");
 		Assert.assertTrue(cisSelected, "CIs tab should be selectable");
 		Assert.assertTrue(ticketDetailsPage.verifyCIsTab(),
 				"CIs tab content should be displayed");
-		ReportManager.pass("Tab 4: CIs verified successfully");
+
+		// Detailed verification of Add CI button and modal
+		ReportManager.info("Verifying 'Add CI' button and modal elements...");
+		Assert.assertTrue(ticketDetailsPage.isAddCIButtonDisplayed(),
+				"'Add CI' button should be visible on CIs tab");
+
+		// Open 'Select CIs' modal
+		ticketDetailsPage.clickAddCI();
+		Assert.assertTrue(ticketDetailsPage.isSelectCIsModalDisplayed(),
+				"'Select CIs' modal should be displayed upon clicking Add CI");
+		Assert.assertTrue(ticketDetailsPage.verifySelectCIsModalElements(),
+				"All Select CIs modal elements (header, search input, checkboxes, Cancel, Select) should be displayed");
+
+		// Verify initial header and Select button state
+		String headerInitial = ticketDetailsPage.getSelectCIsHeaderTitle();
+		ReportManager.info("Initial modal header: " + headerInitial);
+		Assert.assertTrue(headerInitial.contains("Select CIs (0)"),
+				"Initial modal header should indicate 0 selected CIs");
+		Assert.assertFalse(ticketDetailsPage.isSelectButtonEnabled(),
+				"'Select' button should initially be disabled when 0 CIs are selected");
+
+		// Test CI Search functionality
+		int initialCount = ticketDetailsPage.getAvailableCIsCount();
+		ReportManager.info("Available CIs count before search: " + initialCount);
+		Assert.assertTrue(initialCount > 0, "At least one CI should be available in the list");
+
+		ticketDetailsPage.searchCI("ESXi");
+		int filteredCount = ticketDetailsPage.getAvailableCIsCount();
+		ReportManager.info("Available CIs count after filtering by 'ESXi': " + filteredCount);
+		Assert.assertTrue(filteredCount >= 1, "Filtering by 'ESXi' should display matching CI card");
+
+		ticketDetailsPage.clearSearchCI();
+		int restoredCount = ticketDetailsPage.getAvailableCIsCount();
+		ReportManager.info("Available CIs count after clearing search: " + restoredCount);
+		Assert.assertTrue(restoredCount >= initialCount, "Clearing search should restore the full CI list");
+
+		// Test CI Selection & Header Count update
+		ReportManager.info("Testing CI selection toggle...");
+		ticketDetailsPage.toggleCICheckbox(0);
+		String headerSelected = ticketDetailsPage.getSelectCIsHeaderTitle();
+		ReportManager.info("Header after selection: " + headerSelected);
+		Assert.assertTrue(headerSelected.contains("Select CIs (1)"),
+				"Modal header should update to 'Select CIs (1)' after selecting a CI");
+		Assert.assertTrue(ticketDetailsPage.isSelectButtonEnabled(),
+				"'Select' button should be enabled when 1 or more CIs are selected");
+
+		// Uncheck CI
+		ticketDetailsPage.toggleCICheckbox(0);
+		String headerUnselected = ticketDetailsPage.getSelectCIsHeaderTitle();
+		ReportManager.info("Header after unselecting: " + headerUnselected);
+		Assert.assertTrue(headerUnselected.contains("Select CIs (0)"),
+				"Modal header should return to 'Select CIs (0)' after unselecting");
+		Assert.assertFalse(ticketDetailsPage.isSelectButtonEnabled(),
+				"'Select' button should become disabled again when 0 CIs are selected");
+
+		// Cancel modal and verify return to CIs tab
+		ticketDetailsPage.clickCancelCIModal();
+		Assert.assertTrue(ticketDetailsPage.isAddCIButtonDisplayed(),
+				"Should return cleanly to CIs tab after clicking Cancel");
+		ReportManager.pass("Tab 4: CIs and 'Add CI' modal interactions verified successfully");
 
 		// 7. Verify Tab 5: Documents
 		ReportManager.info("Verifying Tab 5: Documents");

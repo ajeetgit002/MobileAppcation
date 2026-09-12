@@ -54,8 +54,14 @@ public class LoginPage extends BasePage {
 	// =========================================
 
 	public boolean isDashboardDisplayed() {
+		if (isDisplayedNow(DASHBOARD_MARKER) 
+				|| isDisplayedNow(AppiumBy.xpath("//*[starts-with(@content-desc,'Ongoing')]"))
+				|| isDisplayedNow(AppiumBy.xpath("//android.widget.ImageView[@content-desc='Tickets']"))) {
+			return true;
+		}
 		handleAnySystemDialogs();
-		return isDisplayed(DASHBOARD_MARKER);
+		return isDisplayed(DASHBOARD_MARKER, java.time.Duration.ofSeconds(3))
+				|| isDisplayed(AppiumBy.xpath("//*[starts-with(@content-desc,'Ongoing')]"), java.time.Duration.ofSeconds(2));
 	}
 
 	public boolean isOrganizationSearchDisplayed() {
@@ -75,14 +81,15 @@ public class LoginPage extends BasePage {
 	// =========================================
 
 	public void handleAnySystemDialogs() {
-		clickIfDisplayed(ALLOW_PERMISSION);
-		clickIfDisplayed(ALLOW_PERMISSION_TEXT);
-		clickIfDisplayed(DENY_PERMISSION_DONT_ASK);
-		clickIfDisplayed(DENY_PERMISSION);
-		clickIfDisplayed(ALLOW_WHILE_USING_APP);
-		clickIfDisplayed(ALLOW_ONE_TIME);
-		clickIfDisplayed(LATER_BUTTON);
-		clickIfDisplayed(LATER_BUTTON_XPATH);
+		java.time.Duration quickWait = java.time.Duration.ofMillis(300);
+		clickIfDisplayed(ALLOW_PERMISSION, quickWait);
+		clickIfDisplayed(ALLOW_PERMISSION_TEXT, quickWait);
+		clickIfDisplayed(DENY_PERMISSION_DONT_ASK, quickWait);
+		clickIfDisplayed(DENY_PERMISSION, quickWait);
+		clickIfDisplayed(ALLOW_WHILE_USING_APP, quickWait);
+		clickIfDisplayed(ALLOW_ONE_TIME, quickWait);
+		clickIfDisplayed(LATER_BUTTON, quickWait);
+		clickIfDisplayed(LATER_BUTTON_XPATH, quickWait);
 	}
 
 	public void handlePermissionIfDisplayed() {
