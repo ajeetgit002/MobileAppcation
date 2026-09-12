@@ -3,6 +3,8 @@ package com.itsm.app.base;
 import com.itsm.app.pages.CreateTicketPage;
 import com.itsm.app.pages.DashboardPage;
 import com.itsm.app.pages.LoginPage;
+import com.itsm.app.pages.TicketDetailsPage;
+import com.itsm.app.pages.TicketsPage;
 import com.itsm.app.utils.AlertUtils;
 import com.itsm.app.utils.AppUtils;
 import com.itsm.app.utils.GestureUtils;
@@ -45,6 +47,8 @@ public final class TestContext {
 	private LoginPage loginPage;
 	private DashboardPage dashboardPage;
 	private CreateTicketPage createTicketPage;
+	private TicketsPage ticketsPage;
+	private TicketDetailsPage ticketDetailsPage;
 
 	// =========================================
 	// CONSTRUCTOR
@@ -207,6 +211,20 @@ public final class TestContext {
 		return createTicketPage;
 	}
 
+	public TicketsPage getTicketsPage() {
+		if (ticketsPage == null) {
+			ticketsPage = new TicketsPage();
+		}
+		return ticketsPage;
+	}
+
+	public TicketDetailsPage getTicketDetailsPage() {
+		if (ticketDetailsPage == null) {
+			ticketDetailsPage = new TicketDetailsPage();
+		}
+		return ticketDetailsPage;
+	}
+
 	// =========================================
 	// CLEAR DRIVER DEPENDENT OBJECTS
 	// =========================================
@@ -223,6 +241,8 @@ public final class TestContext {
 		loginPage = null;
 		dashboardPage = null;
 		createTicketPage = null;
+		ticketsPage = null;
+		ticketDetailsPage = null;
 	}
 
 	// =========================================

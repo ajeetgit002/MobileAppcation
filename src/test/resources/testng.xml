@@ -12,6 +12,7 @@
             <class name="com.itsm.app.tests.LoginTest" />
             <class name="com.itsm.app.tests.DashboardTestScript" />
             <class name="com.itsm.app.tests.TicketCreationTest" />
+            <class name="com.itsm.app.tests.TicketFiltersAndDetailsTest" />
         </classes>
     </test>
 
