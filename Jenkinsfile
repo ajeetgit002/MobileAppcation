@@ -9,7 +9,7 @@ pipeline {
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['qa', 'staging', 'prod'], description: 'Target Environment')
         choice(name: 'PLATFORM', choices: ['Android', 'iOS'], description: 'Target Mobile Platform')
-        string(name: 'RECIPIENT_EMAIL', defaultValue: 'ajeet2581997@gmail.com', description: 'Notification Email Recipient')
+        string(name: 'RECIPIENT_EMAIL', defaultValue: 'ajeet.testingqa@gmail.com', description: 'Notification Email Recipient')
     }
 
     environment {
@@ -236,7 +236,8 @@ pipeline {
                 // Sends via Jenkins Email Extension if plugin is installed
                 try {
                     emailext (
-                        subject: "[CI/CD FAILED] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} at ${FAILED_STAGE}",
+                        failOnError: false,
+                        subject: "[CI/CD FAILED] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} at ${env.FAILED_STAGE}",
                         body: emailBody,
                         mimeType: 'text/html',
                         to: "${params.RECIPIENT_EMAIL}",
@@ -253,6 +254,7 @@ pipeline {
                 echo "Pipeline completed successfully! All gates passed."
                 try {
                     emailext (
+                        failOnError: false,
                         subject: "[CI/CD SUCCESS] ${PROJECT_NAME} - Build #${env.BUILD_NUMBER} Deployed to Production ✅",
                         body: """
                         <h2>${PROJECT_NAME} - Build #${env.BUILD_NUMBER} SUCCESSFUL ✅</h2>
