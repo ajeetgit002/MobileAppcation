@@ -11,6 +11,7 @@
         <classes>
             <class name="com.itsm.app.tests.LoginTest" />
             <class name="com.itsm.app.tests.DashboardTestScript" />
+            <class name="com.itsm.app.tests.TicketCreationTest" />
         </classes>
     </test>
 
